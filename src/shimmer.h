@@ -26,7 +26,7 @@ struct shm_bkpt{
 
 
 /*
- * Context is a struct that gets allocated to address 0xCABBAGE00.
+ * Context is a struct that gets allocated to address 0xCABBA9E00.
  * It stores a data structure for indexing shmem units.
  * If it is not found, or if it has an invalid magic constant,
  * shimmer initialization fails and returns an error.
