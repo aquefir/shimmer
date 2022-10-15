@@ -37,18 +37,24 @@ typedef struct{
 	SHMKind		kind;
 }SHMObj;
 
-
 typedef struct{
 	SHMObj*		objs;
-	int			objct, objcap;
+	int			objct, opjcap;
+	int			nextIx;
+}SHMObjTable;
+
+typedef struct{
+	uint32_t	magic;
+	SHMObjTable	table;
 	SHMLock		lock;
 	
 	char*		filename;
-	int			bufferIndex;
+	int			bufferTop, size;
 }SHMTab;
 
 
-SHMTab*		initShimmerTab	(char*, int);
+SHMTab*		initShimmerTab		(char*, int);
+SHMTab*		connectShimmerTab	(char*, int);
 
 
 #endif

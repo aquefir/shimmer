@@ -1,6 +1,7 @@
 #include "stdint.h"
 #include "stdlib.h"
 #include "string.h"
+#include "stdio.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -54,18 +55,40 @@ int			destroySharedBuffer(char* filename, int index){
 
 SHMTab*		initShimmerTab(char* filename, int size){
 	int flen = strlen(filename);
-	size     = (flen+sizeof(SHMTab)+8192) < size?
-		  roundUpExp2(flen+sizeof(SHMTab)+8192)
-		: size;
+	if((flen+sizeof(SHMTab)+8192) > size){
+		printf("Buffer size too small\n");
+		return NULL;
+	}
 
 	uint64_t* buffer = getMemoryBlock(filename, size, 0);
+	if(buffer       == NULL){
+		printf("Shared memory buffer could not be created\n");
+		return NULL;
+	}
 	uint8_t*  bytes  = (uint8_t*)buffer;
 	char*     fname  = (char*)&bytes[sizeof(SHMTab)];
 	strcpy(fname, filename);
 	
-	SHMTab*   ret = (SHMTab*)buffer;
-	ret->filename = fname;
+	SHMTab* ret    = (SHMTab*)buffer;
+	ret->magic     = 0xC4133378;
+	ret->filename  = fname;
+	ret->size      = size;
+	ret->bufferTop = 0;
 	
+	return ret;
+}
+
+SHMTab*		connectShimmerTab(char* filename, int size){
+	uint64_t* buffer = getMemoryBlock(filename, size, 0);
+	if(buffer       == NULL){
+		printf("Shared memory buffer could not be located\n");
+		return NULL;
+	}
+	SHMTab*   ret    = (SHMTab*)buffer;
+	if(ret->magic   != 0xC4133378){
+		printf("Shared memory buffer is not properly initialized\n");
+		return NULL;
+	}
 	return ret;
 }
 

@@ -7,4 +7,9 @@
 
 int main(){
 	printf("View program\n");
+	SHMTab* shtab = connectShimmerTab("shmem", 16384);
+	printf("%p\n", shtab);
+	if(shtab != NULL){
+		printf("%s\n", shtab->filename);
+	}
 }
