@@ -48,5 +48,7 @@ typedef struct{
 }SHMTab;
 
 
+SHMTab*		initShimmerTab	(char*, int);
+
 
 #endif

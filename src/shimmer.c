@@ -54,14 +54,19 @@ int			destroySharedBuffer(char* filename, int index){
 
 SHMTab*		initShimmerTab(char* filename, int size){
 	int flen = strlen(filename);
-	size     = (flen+sizeof(SHMTab)+16384) < size?
-		  roundUpExp2(flen+sizeof(SHMTab)+16384)
+	size     = (flen+sizeof(SHMTab)+8192) < size?
+		  roundUpExp2(flen+sizeof(SHMTab)+8192)
 		: size;
 
 	uint64_t* buffer = getMemoryBlock(filename, size, 0);
+	uint8_t*  bytes  = (uint8_t*)buffer;
+	char*     fname  = (char*)&bytes[sizeof(SHMTab)];
+	strcpy(fname, filename);
 	
+	SHMTab*   ret = (SHMTab*)buffer;
+	ret->filename = fname;
 	
-	return NULL;
+	return ret;
 }
 
 
