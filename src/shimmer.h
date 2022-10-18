@@ -17,6 +17,15 @@ typedef struct{
 }SHMBuff;
 
 typedef struct{
+	uint64_t**	pages;
+	uint32_t	pagect;
+	uint32_t	pagesize;
+	uint32_t	pageread;
+	uint32_t	pagehead;	
+}SHMPage;
+
+
+typedef struct{
 	uint32_t	lock;
 }SHMLock;
 
@@ -24,7 +33,8 @@ typedef enum{
 	SHMK_NULL	= 0,
 	SHMK_FEED	= 1,
 	SHMK_BUFF	= 2,
-	SHMK_LOCK	= 3
+	SHMK_PAGE	= 3,
+	SHMK_LOCK	= 4
 }SHMKind;
 
 typedef struct{
@@ -32,6 +42,7 @@ typedef struct{
 	union{
 		SHMFeed		feed;
 		SHMBuff		buff;
+		SHMPage		page;
 		SHMLock		lock;
 	};
 	SHMKind		kind;
@@ -48,13 +59,18 @@ typedef struct{
 	SHMObjTable	table;
 	SHMLock		lock;
 	
-	char*		filename;
 	int			bufferTop, size;
 }SHMTab;
 
 
-SHMTab*		initShimmerTab		(char*, int);
-SHMTab*		connectShimmerTab	(char*, int);
+SHMTab*		initShimmerTab		(char*, uint32_t);
+SHMTab*		connectShimmerTab	(char*, uint32_t);
+char*		getFilename			(SHMTab*);
+
+int32_t		makeSHMFeed			(SHMTab*, char*, uint32_t);
+int32_t		makeSHMBuff			(SHMTab*, char*, uint32_t);
+int32_t		makeSHMPage			(SHMTab*, char*, uint32_t);
+int32_t		makeSHMLock			(SHMTab*, char*, uint32_t);
 
 
 #endif

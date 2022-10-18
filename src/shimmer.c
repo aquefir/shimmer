@@ -53,7 +53,13 @@ int			destroySharedBuffer(char* filename, int index){
 }
 
 
-SHMTab*		initShimmerTab(char* filename, int size){
+char* getFilename(SHMTab* shtab){
+	char* buffer = (char*)shtab;
+	return (char*)&buffer[sizeof(SHMTab)];
+}
+
+
+SHMTab*		initShimmerTab(char* filename, uint32_t size){
 	int flen = strlen(filename);
 	if((flen+sizeof(SHMTab)+8192) > size){
 		printf("Buffer size too small\n");
@@ -71,14 +77,13 @@ SHMTab*		initShimmerTab(char* filename, int size){
 	
 	SHMTab* ret    = (SHMTab*)buffer;
 	ret->magic     = 0xC4133378;
-	ret->filename  = fname;
 	ret->size      = size;
 	ret->bufferTop = 0;
 	
 	return ret;
 }
 
-SHMTab*		connectShimmerTab(char* filename, int size){
+SHMTab*		connectShimmerTab(char* filename, uint32_t size){
 	uint64_t* buffer = getMemoryBlock(filename, size, 0);
 	if(buffer       == NULL){
 		printf("Shared memory buffer could not be located\n");
