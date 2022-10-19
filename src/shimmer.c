@@ -8,64 +8,48 @@
 
 #include "shimmer.h"
 
-
-
-// ftok		: file  -> key
-// shmget	: key   -> block
-// shmat	: block -> ptr
-
 int roundUpExp2(uint64_t x){
 	int lz = __builtin_clzl(x);
 	return 1l << (63-lz);
 }
 
-
-int			getSharedBuffer(char* filename, int size, int index){
+int	getSharedBuffer(char* filename, int size, int index){
 	key_t	key;
-	
 	key = ftok(filename, index);
 	if(key < 0) return -1;
-	
 	return shmget(key, size, 0644 | IPC_CREAT);
 }
 
-uint64_t*	getMemoryBlock(char* filename, int size, int index){
+uint64_t* getMemoryBlock(char* filename, int size, int index){
 	int bufferId = getSharedBuffer(filename, size, index);
 	uint64_t* ret;
-	
 	if(bufferId < 0) return NULL;
-	
 	ret = shmat(bufferId, 0, index);
 	if(ret == NULL) return NULL;
-	
 	return ret;
 }
 
-int			detatchSharedBuffer(uint64_t* buffer){
+int	detatchSharedBuffer(uint64_t* buffer){
 	return (shmdt(buffer) != -1);
 }
 
-int			destroySharedBuffer(char* filename, int index){
+int	destroySharedBuffer(char* filename, int index){
 	int bufferId = getSharedBuffer(filename, 0, index);
 	if(bufferId == -1) return 0;
-	
 	return (shmctl(bufferId, IPC_RMID, 0) != -1);
 }
-
 
 char* getFilename(SHMTab* shtab){
 	char* buffer = (char*)shtab;
 	return (char*)&buffer[sizeof(SHMTab)];
 }
 
-
-SHMTab*		initShimmerTab(char* filename, uint32_t size){
+SHMTab*	initShimmerTab(char* filename, uint32_t size){
 	int flen = strlen(filename);
 	if((flen+sizeof(SHMTab)+8192) > size){
 		printf("Buffer size too small\n");
 		return NULL;
 	}
-
 	uint64_t* buffer = getMemoryBlock(filename, size, 0);
 	if(buffer       == NULL){
 		printf("Shared memory buffer could not be created\n");
@@ -83,7 +67,7 @@ SHMTab*		initShimmerTab(char* filename, uint32_t size){
 	return ret;
 }
 
-SHMTab*		connectShimmerTab(char* filename, uint32_t size){
+SHMTab*	connectShimmerTab(char* filename, uint32_t size){
 	uint64_t* buffer = getMemoryBlock(filename, size, 0);
 	if(buffer       == NULL){
 		printf("Shared memory buffer could not be located\n");
@@ -96,5 +80,52 @@ SHMTab*		connectShimmerTab(char* filename, uint32_t size){
 	}
 	return ret;
 }
+
+
+
+SHMObj* prepSHMObj (SHMTab* shtab, char* name, uint32_t size){
+	/*
+		Allocate SHMObj to table, extending table if necessary
+		Set name
+		If size != 0, allocate a buffer, set child buffer pointer, bufferIx
+		Return SHMObj pointer
+	*/
+	return NULL;
+}
+
+
+
+int32_t	makeSHMFeed(SHMTab* shtab, char* name, uint32_t size){
+	SHMObj* obj = prepSHMObj(shtab, name, size);
+	
+	return 0;
+}
+
+
+int32_t	makeSHMBuff(SHMTab* shtab, char* name, uint32_t size){
+	SHMObj* obj = prepSHMObj(shtab, name, size);
+
+	return 0;
+}
+
+
+int32_t	makeSHMPage(SHMTab* shtab, char* name, uint32_t size, uint32_t pagect){
+	uint32_t bufferSize = size * pagect;
+	SHMObj* obj = prepSHMObj(shtab, name, bufferSize);
+	
+	return 0;
+}
+
+
+int32_t	makeSHMLock(SHMTab* shtab, char* name, uint32_t init){
+	SHMObj* obj = prepSHMObj(shtab, name, 0);
+
+	return 0;
+}
+
+
+
+
+
 
 
