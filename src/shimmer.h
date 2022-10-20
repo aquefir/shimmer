@@ -72,5 +72,6 @@ int32_t		makeSHMBuff			(SHMTab*, char*, uint32_t);
 int32_t		makeSHMPage			(SHMTab*, char*, uint32_t, uint32_t);
 int32_t		makeSHMLock			(SHMTab*, char*, uint32_t);
 
+void		printSHMTab			(SHMTab*);
 
 #endif

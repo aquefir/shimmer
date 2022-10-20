@@ -11,6 +11,8 @@ int main(){
 	SHMTab* shtab =	initShimmerTab("shmem", 16384);
 	printf("%p %s\n", shtab, getFilename(shtab));
 	
+	printSHMTab(shtab);
+	
 	char text[1024];
 	fgets(text, 1024, stdin);
 }
