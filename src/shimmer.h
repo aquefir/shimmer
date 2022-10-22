@@ -60,7 +60,7 @@ typedef struct{
 	SHMObjTable	table;
 	SHMLock		lock;
 	
-	int			bufferTop, size;
+	uint32_t	bufferTop, size;
 }SHMTab;
 
 SHMTab*		initShimmerTab		(char*, uint32_t);
@@ -73,5 +73,22 @@ int32_t		makeSHMPage			(SHMTab*, char*, uint32_t, uint32_t);
 int32_t		makeSHMLock			(SHMTab*, char*, uint32_t);
 
 void		printSHMTab			(SHMTab*);
+
+
+/*
+	TODO:
+	* shared table:
+		* pars : file, bufct
+		* allocate >= space to SHMObj[bufct], round up to nearest 4k page
+	* index(SHMTab*, int) -> SHMObj*
+	* local pointer table for getting pointers to pages
+	* should be able to get a table of shmobjs and print it to the terminal
+	* shmlock : timing mechanism for efficient sleeping?
+	* shmbuff : raw byte buffer
+	* shmpage : array of raw byte buffers, rd/wt indices, lock on collision
+	* shmfeed : insert into queue, lock when full
+	* remapPtr(void*, SHMPtrTab) -> void*
+
+*/
 
 #endif
