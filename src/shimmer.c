@@ -83,8 +83,14 @@ SHMTab*	connectShimmerTab(char* filename, uint32_t size){
 }
 
 SHMObj* SHM_index(SHMTab* shtab, int ix){
-	if(ix < 0) return NULL;
-	if(ix > shtab->bufferCap) return NULL; // FIXME
+	if(ix <                0){
+		//printf("0\n");
+		return NULL;
+	}
+	if(ix > shtab->bufferCap){
+		//printf("of\n");
+		return NULL;
+	} // FIXME
 	
 	SHMObj* objs = (SHMObj*)((uint64_t*)shtab)[shtab->bufferOffset/8];
 	return &objs[ix];
@@ -93,43 +99,46 @@ SHMObj* SHM_index(SHMTab* shtab, int ix){
 
 
 SHMObj* prepSHMObj (SHMTab* shtab, char* name, uint32_t size){
-	/*
-		Allocate SHMObj to table, extending table if necessary
-		Set name
-		If size != 0, allocate a buffer, set child buffer pointer, bufferIx
-		Return SHMObj pointer
-	*/
-	return NULL;
+	if(shtab->bufferTop+1 >= shtab->bufferCap){
+		// For now, just assume we don't overflow the SHMObj table
+		printf("ope\n");
+	}
+	shtab->bufferTop++;
+	return SHM_index(shtab, shtab->bufferTop-1);
 }
 
 
 
 int32_t	makeSHMFeed(SHMTab* shtab, char* name, uint32_t size){
-	SHMObj* obj = prepSHMObj(shtab, name, size);
+	SHMObj* obj    = prepSHMObj(shtab, name, 0);
+	obj->kind      = SHMK_FEED;
 	
-	return 0;
+	return shtab->bufferTop-1;
 }
 
 
 int32_t	makeSHMBuff(SHMTab* shtab, char* name, uint32_t size){
-	SHMObj* obj = prepSHMObj(shtab, name, size);
+	SHMObj* obj    = prepSHMObj(shtab, name, 0);
+	obj->kind      = SHMK_BUFF;
 
-	return 0;
+	return shtab->bufferTop-1;
 }
 
 
 int32_t	makeSHMPage(SHMTab* shtab, char* name, uint32_t size, uint32_t pagect){
 	uint32_t bufferSize = size * pagect;
-	SHMObj* obj = prepSHMObj(shtab, name, bufferSize);
+	SHMObj* obj    = prepSHMObj(shtab, name, 0);
+	obj->kind      = SHMK_PAGE;
 	
-	return 0;
+	return shtab->bufferTop-1;
 }
 
 
 int32_t	makeSHMLock(SHMTab* shtab, char* name, uint32_t init){
-	SHMObj* obj = prepSHMObj(shtab, name, 0);
-
-	return 0;
+	SHMObj* obj    = prepSHMObj(shtab, name, 0);
+	obj->kind      = SHMK_LOCK;
+	obj->lock.lock = init;
+	return shtab->bufferTop-1;
 }
 
 void printSHMTab(SHMTab* shtab){

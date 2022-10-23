@@ -3,5 +3,5 @@ all:
 	clang -O3    tests/view.c src/*.c -o view
 	
 debug:
-	clang -Og -g tests/main.c src/*.c -o test
-	clang -Og -g tests/view.c src/*.c -o view
+	clang -Og -O0 -g tests/main.c src/*.c -o test
+	clang -Og -O0 -g tests/view.c src/*.c -o view
