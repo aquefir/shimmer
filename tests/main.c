@@ -8,8 +8,10 @@
 int main(){
 	printf("Test program\n");
 	
-	SHMTab* shtab =	initShimmerTab("shmem", 16384);
+	SHMTab* shtab =	initShimmerTab("shmem", 128);
 	printf("%p %s\n", shtab, getFilename(shtab));
+	int buff = makeSHMBuff(shtab, "buff", 8192);
+	int feed = makeSHMFeed(shtab, "feed", 8192);
 	
 	printSHMTab(shtab);
 	

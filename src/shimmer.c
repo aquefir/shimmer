@@ -93,6 +93,7 @@ SHMObj* SHM_index(SHMTab* shtab, int ix){
 	} // FIXME
 	
 	SHMObj* objs = (SHMObj*)((uint64_t*)shtab)[shtab->bufferOffset/8];
+	//printf("SHTAB = %p, OBJS = %p\n", shtab, objs);
 	return &objs[ix];
 }
 
@@ -104,13 +105,19 @@ SHMObj* prepSHMObj (SHMTab* shtab, char* name, uint32_t size){
 		printf("ope\n");
 	}
 	shtab->bufferTop++;
-	return SHM_index(shtab, shtab->bufferTop-1);
+	SHMObj* ret = SHM_index(shtab, shtab->bufferTop-1);
+	for(int i = 0; i < 15; i++){
+		ret->name[i] = name[i];
+		if(name[i] == 0) break;
+	}
+	ret->name[15] = 0;
+	return ret;
 }
 
 
 
 int32_t	makeSHMFeed(SHMTab* shtab, char* name, uint32_t size){
-	SHMObj* obj    = prepSHMObj(shtab, name, 0);
+	SHMObj* obj    = prepSHMObj(shtab, name, size);
 	obj->kind      = SHMK_FEED;
 	
 	return shtab->bufferTop-1;
@@ -118,7 +125,7 @@ int32_t	makeSHMFeed(SHMTab* shtab, char* name, uint32_t size){
 
 
 int32_t	makeSHMBuff(SHMTab* shtab, char* name, uint32_t size){
-	SHMObj* obj    = prepSHMObj(shtab, name, 0);
+	SHMObj* obj    = prepSHMObj(shtab, name, size);
 	obj->kind      = SHMK_BUFF;
 
 	return shtab->bufferTop-1;
@@ -127,7 +134,7 @@ int32_t	makeSHMBuff(SHMTab* shtab, char* name, uint32_t size){
 
 int32_t	makeSHMPage(SHMTab* shtab, char* name, uint32_t size, uint32_t pagect){
 	uint32_t bufferSize = size * pagect;
-	SHMObj* obj    = prepSHMObj(shtab, name, 0);
+	SHMObj* obj    = prepSHMObj(shtab, name, bufferSize);
 	obj->kind      = SHMK_PAGE;
 	
 	return shtab->bufferTop-1;
@@ -154,10 +161,10 @@ void printSHMTab(SHMTab* shtab){
 				case SHMK_NULL	: printf("NULL\n"); break;
 				case SHMK_FREE	: printf("FREE\n"); break;
 	
-				case SHMK_FEED	: printf("FEED\n"); break;
-				case SHMK_BUFF	: printf("BUFF\n"); break;
-				case SHMK_PAGE	: printf("PAGE\n"); break;
-				case SHMK_LOCK	: printf("LOCK\n"); break;
+				case SHMK_FEED	: printf("FEED | \"%s\"\n", obj->name); break;
+				case SHMK_BUFF	: printf("BUFF | \"%s\"\n", obj->name); break;
+				case SHMK_PAGE	: printf("PAGE | \"%s\"\n", obj->name); break;
+				case SHMK_LOCK	: printf("LOCK | \"%s\"\n", obj->name); break;
 			}
 		}
 	}

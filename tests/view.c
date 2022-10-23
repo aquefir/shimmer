@@ -8,9 +8,9 @@
 int main(){
 	printf("View program\n");
 	
-	SHMTab* shtab = connectShimmerTab("shmem", 16384);
+	SHMTab* shtab = connectShimmerTab("shmem", 128);
 	
-	int buff = makeSHMBuff(shtab, "buff", 8192);
+	printSHMTab(shtab);
 	
 	printf("%p\n", shtab);
 	if(shtab != NULL){
