@@ -44,12 +44,11 @@ char* getFilename(SHMTab* shtab){
 	return (char*)&buffer[sizeof(SHMTab)];
 }
 
-SHMTab*	initShimmerTab(char* filename, uint32_t size){
+SHMTab*	initShimmerTab(char* filename, uint32_t buffsz){
 	int flen = strlen(filename);
-	if((flen+sizeof(SHMTab)+8192) > size){
-		printf("Buffer size too small\n");
-		return NULL;
-	}
+	
+	int size = flen + 8 + sizeof(SHMTab) + (sizeof(SHMObj) * buffsz);
+	size     = ((size / 4096) + ((size % 4096) != 0)) * 4096;
 	uint64_t* buffer = getMemoryBlock(filename, size, 0);
 	if(buffer       == NULL){
 		printf("Shared memory buffer could not be created\n");
@@ -61,7 +60,8 @@ SHMTab*	initShimmerTab(char* filename, uint32_t size){
 	
 	SHMTab* ret    = (SHMTab*)buffer;
 	ret->magic     = 0xC4133378;
-	ret->size      = size;
+	ret->size      =  size;
+	ret->bufferCap = (size - (flen + 8 + sizeof(SHMTab))) / sizeof(SHMObj);
 	ret->bufferTop = 0;
 	
 	return ret;
