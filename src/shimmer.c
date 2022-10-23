@@ -135,18 +135,22 @@ int32_t	makeSHMLock(SHMTab* shtab, char* name, uint32_t init){
 void printSHMTab(SHMTab* shtab){
 	printf("MAGIC : %08x\n"   , shtab->magic);
 	printf("LOCK  : %08x\n"   , shtab->lock.lock);
-	printf("BUFFER: [%i/%i]\n", shtab->bufferTop, shtab->size);
+	printf("BUFFER: [%i/%i]\n", shtab->bufferTop, shtab->bufferCap);
 	
-	char   * shpath = &((char   *)shtab)[sizeof(SHMTab)];
-	uint8_t* buffer = &((uint8_t*)shtab)[sizeof(SHMTab) + strlen(shpath)];
+	for(int i = 0; i < shtab->bufferTop; i++){
+		SHMObj* obj = SHM_index(shtab, i);
+		if(obj != NULL){
+			printf("OBJ %i : ", i);
+			switch(obj->kind){
+				case SHMK_NULL	: printf("NULL\n"); break;
+				case SHMK_FREE	: printf("FREE\n"); break;
 	
-	SHMObjTable* tab = &shtab->table;
-	while(tab != NULL){
-		printf("  TAB\n");
-		if(tab->nextIx)
-			tab = (SHMObjTable*)getMemoryBlock(shpath, 0, tab->nextIx);
-		else
-			tab = NULL;
+				case SHMK_FEED	: printf("FEED\n"); break;
+				case SHMK_BUFF	: printf("BUFF\n"); break;
+				case SHMK_PAGE	: printf("PAGE\n"); break;
+				case SHMK_LOCK	: printf("LOCK\n"); break;
+			}
+		}
 	}
 }
 

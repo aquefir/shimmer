@@ -27,11 +27,13 @@ typedef struct{
 }SHMLock;
 
 typedef enum{
-	SHMK_NULL	= 0,
-	SHMK_FEED	= 1,
-	SHMK_BUFF	= 2,
-	SHMK_PAGE	= 3,
-	SHMK_LOCK	= 4
+	SHMK_NULL	= 0x00,
+	SHMK_FREE	= 0x01,
+	
+	SHMK_FEED	= 0x10,
+	SHMK_BUFF	= 0x11,
+	SHMK_PAGE	= 0x12,
+	SHMK_LOCK	= 0x13
 }SHMKind;
 
 typedef struct{
@@ -63,6 +65,14 @@ typedef struct{
 	uint32_t	bufferTop, bufferCap, size, bufferOffset;
 }SHMTab;
 
+typedef struct{
+	SHMTab*		shtab;
+	
+	void**		pointers;
+	int32_t*	sizes;
+	int32_t		size, fill;
+}SHMTable;
+
 SHMTab*		initShimmerTab		(char*, uint32_t);
 SHMTab*		connectShimmerTab	(char*, uint32_t);
 char*		getFilename			(SHMTab*);
@@ -81,8 +91,8 @@ void		printSHMTab			(SHMTab*);
 		x pars : file, bufct
 		x allocate >= space to SHMObj[bufct], round up to nearest 4k page
 	x index(SHMTab*, int) -> SHMObj*
-	* local pointer table for getting pointers to pages
-	* should be able to get a table of shmobjs and print it to the terminal
+	_ local pointer table for getting pointers to pages
+	x should be able to get a table of shmobjs and print it to the terminal
 	* shmlock : timing mechanism for efficient sleeping?
 	* shmbuff : raw byte buffer
 	* shmpage : array of raw byte buffers, rd/wt indices, lock on collision
