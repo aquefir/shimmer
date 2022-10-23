@@ -54,15 +54,16 @@ SHMTab*	initShimmerTab(char* filename, uint32_t buffsz){
 		printf("Shared memory buffer could not be created\n");
 		return NULL;
 	}
-	uint8_t*  bytes  = (uint8_t*)buffer;
-	char*     fname  = (char*)&bytes[sizeof(SHMTab)];
+	uint8_t*  bytes   = (uint8_t*)buffer;
+	char*     fname   = (char*)&bytes[sizeof(SHMTab)];
 	strcpy(fname, filename);
 	
-	SHMTab* ret    = (SHMTab*)buffer;
-	ret->magic     = 0xC4133378;
-	ret->size      =  size;
-	ret->bufferCap = (size - (flen + 8 + sizeof(SHMTab))) / sizeof(SHMObj);
-	ret->bufferTop = 0;
+	SHMTab* ret       = (SHMTab*)buffer;
+	ret->magic        = 0xC4133378;
+	ret->size         =  size;
+	ret->bufferCap    = (size - (flen + 8 + sizeof(SHMTab))) / sizeof(SHMObj);
+	ret->bufferTop    = 0;
+	ret->bufferOffset = (flen + 8 + sizeof(SHMTab)) & 0xfffffffffffffff8;
 	
 	return ret;
 }
@@ -79,6 +80,14 @@ SHMTab*	connectShimmerTab(char* filename, uint32_t size){
 		return NULL;
 	}
 	return ret;
+}
+
+SHMObj* SHM_index(SHMTab* shtab, int ix){
+	if(ix < 0) return NULL;
+	if(ix > shtab->bufferCap) return NULL; // FIXME
+	
+	SHMObj* objs = (SHMObj*)((uint64_t*)shtab)[shtab->bufferOffset/8];
+	return &objs[ix];
 }
 
 
