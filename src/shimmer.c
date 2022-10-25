@@ -92,7 +92,7 @@ SHMObj* SHM_index(SHMTab* shtab, int ix){
 		return NULL;
 	} // FIXME
 	
-	SHMObj* objs = (SHMObj*)((uint64_t*)shtab)[shtab->bufferOffset/8];
+	SHMObj* objs = (SHMObj*)&(((uint64_t*)shtab)[shtab->bufferOffset/8]);
 	//printf("SHTAB = %p, OBJS = %p\n", shtab, objs);
 	return &objs[ix];
 }
