@@ -171,8 +171,27 @@ void printSHMTab(SHMTab* shtab){
 }
 
 
+SHM initShimmer(char* filename, uint32_t buffsz){
+	SHM ret;
+	int scale    = (buffsz & 1023)? (buffsz * 4) & ~1023l : buffsz * 2;
+	ret.shtab    = initShimmerTab(filename, buffsz);
+	ret.pointers = malloc(sizeof(void*  ) * buffsz);
+	ret.sizes    = malloc(sizeof(int64_t) * buffsz);
+	ret.size     = buffsz;
+	ret.fill     = 0;
+	return ret;
+}
 
 
+
+
+/*
+	Allocating new pages is not entirely thread safe. It's thread safe across the shared memory
+	barrer; no need to synchronize between the program and its viewer. Inside the program, or
+	inside the viewer, it's less safe, you want to make sure no two threads within a program
+	try to allocate a page at the same time. That said, this really shouldn't be that hard, you
+	probably shouldn't be allocating a million pages anyway.
+*/
 
 
 

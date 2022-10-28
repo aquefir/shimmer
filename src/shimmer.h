@@ -69,10 +69,12 @@ typedef struct{
 	SHMTab*		shtab;
 	
 	void**		pointers;
-	int32_t*	sizes;
-	int32_t		size, fill;
-}SHMTable;
+	int64_t*	sizes;
+	int64_t		size, fill;
+}SHM;
 
+
+SHM			initShimmer			(char*, uint32_t);
 SHMTab*		initShimmerTab		(char*, uint32_t);
 SHMTab*		connectShimmerTab	(char*, uint32_t);
 char*		getFilename			(SHMTab*);
