@@ -8,12 +8,12 @@
 int main(){
 	printf("View program\n");
 	
-	SHMTab* shtab = connectShimmerTab("shmem", 128);
+	SHM shm = connectShimmer("shmem", 128);
 	
-	printSHMTab(shtab);
+	printSHMTab(&shm);
 	
-	printf("%p\n", shtab);
-	if(shtab != NULL){
-		printf("%s\n", getFilename(shtab));
+	printf("%p\n", shm.shtab);
+	if(shm.shtab != NULL){
+		printf("%s\n", getFilename(shm.shtab));
 	}
 }

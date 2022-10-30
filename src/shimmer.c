@@ -149,6 +149,17 @@ SHM initShimmer(char* filename, uint32_t buffsz){
 	return ret;
 }
 
+SHM connectShimmer(char* filename, uint32_t buffsz){
+	SHM ret;
+	int scale    = (buffsz & 1023)? (buffsz * 4) & ~1023l : buffsz * 2;
+	ret.shtab    = connectShimmerTab(filename, buffsz);
+	ret.pointers = malloc(sizeof(void*  ) * buffsz);
+	ret.sizes    = malloc(sizeof(int64_t) * buffsz);
+	ret.size     = buffsz;
+	ret.fill     = 0;
+	return ret;
+}
+
 
 /*
 	Allocating new pages is not entirely thread safe. It's thread safe across the shared memory
@@ -166,8 +177,11 @@ SHM initShimmer(char* filename, uint32_t buffsz){
 	It also technically applies to some of the other initialization functions, but honestly I'm
 	not designing this around having multiple shimmer instances in a single program.
 */
-int32_t	makeSHMFeed(SHMTab* shtab, char* name, uint32_t size){
+int32_t	makeSHMFeed(SHM* shm, char* name, uint32_t size){
+	SHMTab*   shtab  = shm->shtab;
 	uint64_t* buffer = getMemoryBlock(name, size, shtab->bufferTop);
+	shm->pointers[shtab->bufferTop] = buffer;
+	shtab->bufferTop++;
 	SHMObj* obj      = prepSHMObj(shtab, name, size);
 	obj->kind        = SHMK_FEED;
 	
@@ -175,8 +189,11 @@ int32_t	makeSHMFeed(SHMTab* shtab, char* name, uint32_t size){
 }
 
 
-int32_t	makeSHMBuff(SHMTab* shtab, char* name, uint32_t size){
+int32_t	makeSHMBuff(SHM* shm, char* name, uint32_t size){
+	SHMTab*   shtab  = shm->shtab;
 	uint64_t* buffer = getMemoryBlock(name, size, shtab->bufferTop);
+	shm->pointers[shtab->bufferTop] = buffer;
+	shtab->bufferTop++;
 	SHMObj* obj      = prepSHMObj(shtab, name, size);
 	obj->kind        = SHMK_BUFF;
 
@@ -184,8 +201,11 @@ int32_t	makeSHMBuff(SHMTab* shtab, char* name, uint32_t size){
 }
 
 
-int32_t	makeSHMPage(SHMTab* shtab, char* name, uint32_t size, uint32_t pagect){
+int32_t	makeSHMPage(SHM* shm, char* name, uint32_t size, uint32_t pagect){
+	SHMTab*   shtab  = shm->shtab;
 	uint64_t* buffer = getMemoryBlock(name, size, shtab->bufferTop);
+	shm->pointers[shtab->bufferTop] = buffer;
+	shtab->bufferTop++;
 	uint32_t bufferSize = size * pagect;
 	SHMObj* obj      = prepSHMObj(shtab, name, bufferSize);
 	obj->kind        = SHMK_PAGE;
@@ -194,13 +214,21 @@ int32_t	makeSHMPage(SHMTab* shtab, char* name, uint32_t size, uint32_t pagect){
 }
 
 
-int32_t	makeSHMLock(SHMTab* shtab, char* name, uint32_t init){
-	uint64_t* buffer = getMemoryBlock(name, size, shtab->bufferTop);
+int32_t	makeSHMLock(SHM* shm, char* name, uint32_t init){
+	SHMTab*   shtab  = shm->shtab;
+	shtab->bufferTop++;
 	SHMObj* obj      = prepSHMObj(shtab, name, 0);
 	obj->kind        = SHMK_LOCK;
 	obj->lock.lock   = init;
 	return shtab->bufferTop-1;
 }
+
+
+
+uint32_t SHM_isLocked(SHMLock* lock){
+	return (lock->lock) != 0;
+}
+
 
 
 

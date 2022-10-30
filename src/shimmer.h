@@ -75,14 +75,15 @@ typedef struct{
 
 
 SHM			initShimmer			(char*, uint32_t);
+SHM 		connectShimmer		(char*, uint32_t);
 SHMTab*		initShimmerTab		(char*, uint32_t);
 SHMTab*		connectShimmerTab	(char*, uint32_t);
 char*		getFilename			(SHMTab*);
 
-int32_t		makeSHMFeed			(SHMTab*, char*, uint32_t);
-int32_t		makeSHMBuff			(SHMTab*, char*, uint32_t);
-int32_t		makeSHMPage			(SHMTab*, char*, uint32_t, uint32_t);
-int32_t		makeSHMLock			(SHMTab*, char*, uint32_t);
+int32_t		makeSHMFeed			(SHM*, char*, uint32_t);
+int32_t		makeSHMBuff			(SHM*, char*, uint32_t);
+int32_t		makeSHMPage			(SHM*, char*, uint32_t, uint32_t);
+int32_t		makeSHMLock			(SHM*, char*, uint32_t);
 
 void		printSHMTab			(SHM*);
 
