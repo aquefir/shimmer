@@ -1,0 +1,40 @@
+Shimmer notes:
+* I'm not using shmat() correctly, as well as some other functions.
+	It looks like ftok is the only sysfunc that actually needs to worry about the index.
+	The last parameter of shmat() is for flags, not another index.
+	
+ftok   : file, index -> key
+shmget : key         -> block
+shmat  : block       -> ptr
+shmdt  : block       -> <detatch>
+shmctl : takes a block id and does some operation. deletes the block given the right parameters
+
+
+
+make SHM
+	make assumes shared memory block does not already exist, fails if it does
+connect SHM
+	connect assumes shared memory block already exists, fails if it doesn't
+make feed
+make buffer
+make page
+make lock
+del  feed
+del  buffer
+del  page
+del  lock
+
+
+We need a basic visualization tool for shimmer:
+* enumerate current objects
+* lock/unlock
+* display feed
+	* text
+	* hex
+	* pixels
+	* entropy
+	* line chart
+	* histogram
+	* bigram
+* display buffer
+* display page
