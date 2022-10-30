@@ -70,3 +70,102 @@ int connectShimmer(Shimmer* ret, char* file, int size){
 
 	return 1;
 }
+
+
+SHMObj* newSHMObj(Shimmer* shm){
+	if(shm->fill+1 >= shm->size) return NULL;
+	
+	shm->buffers[shm->fill] = 0;
+	shm->sizes  [shm->fill] = 0;
+	shm->fill++;
+	
+	ShimmerContext* cxt = (ShimmerContext*)shm->buffers[0];
+
+	SHMObj* objs = (SHMObj*)(&((uint8_t*)cxt)[sizeof(ShimmerContext)]);
+	cxt->fill++;
+	return &objs[cxt->fill-1];
+}
+
+
+
+SHMBuff*	newSHMBuff		(Shimmer* shm, int size){
+	key_t	key;
+	key = ftok(shm->path, shm->fill-1);
+	if(key < 0) return 0;
+	int shmid = shmget(key, size, 0644 | IPC_CREAT);
+	if(shmid < 0) return 0;
+	
+	SHMObj* obj = newSHMObj(shm);
+	shm->buffers[shm->fill-1] = shmat(shmid, 0, 0);
+	shm->sizes  [shm->fill-1] = size;
+	
+	obj->buff.size	= size;
+	obj->shmix		= key;
+	obj->kind		= SH_BUFF;
+	return &obj->buff;
+}
+
+SHMLock*	newSHMLock		(Shimmer* shm, int state){
+	SHMObj* obj = newSHMObj(shm);
+	shm->buffers[shm->fill-1] = (void*)obj;
+	shm->sizes  [shm->fill-1] = -1;
+	
+	obj->lock.state = state;
+	obj->shmix		= 0;
+	obj->kind		= SH_LOCK;
+	return &obj->lock;
+}
+
+
+SHMObj* SHM_index(Shimmer* shm, int ix){
+	if((ix < 0) || (ix >= shm->fill)) return NULL;
+	ShimmerContext* cxt = (ShimmerContext*)shm->buffers[0];
+	SHMObj* objs = (SHMObj*)(&((uint8_t*)cxt)[sizeof(ShimmerContext)]);
+	return &objs[ix];
+}
+
+
+
+
+
+
+
+
+int			SHM_openLock	(SHMLock* l){
+	return 0;
+}
+
+int			SHM_setLock		(SHMLock* l, int s){
+	return 0;
+}
+
+int			SHM_checkLock	(SHMLock* l){
+	return 0;
+}
+
+uint8_t*	SHM_bufferPtr	(SHMBuff* b, Shimmer* s){
+	return NULL;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
